@@ -5,14 +5,19 @@ import { useSidebar } from '@/context/SidebarContext'
 
 
 const Sidebar = () => {
-    const { currentVideos, currentPage, totalPages, goToNextPage, goToPreviousPage } = useSidebar()
+    const { currentVideos, currentPage, totalPages, selectedVideo, setSelectedVideo, goToNextPage, goToPreviousPage } = useSidebar()
 
-    console.log('Testing current videos', currentVideos)
+    const handleSelectVideo = (id: string) => {
+        console.log('click')
+        setSelectedVideo(id)
+    }
+
+    console.log('Testing current videos', selectedVideo)
     return (
         <div className='w-full lg:w-1/4 xl:w-[492px] p-4 border-b lg:border-b-0 lg:border-r border-gray-300'>
             <div className=''>Search</div>
             {currentVideos.map((video) => (
-                <div key={video.id.videoId} className='flex'>
+                <div key={video.id.videoId} className={`flex ${selectedVideo === video.id.videoId ? 'border-gray-300' : ''}`} onClick={() => handleSelectVideo(video.id.videoId)}>
                     <div className="relative w-40 h-24 flex-shrink-0">
                         <Image
                             src={video.snippet.thumbnails.high.url}

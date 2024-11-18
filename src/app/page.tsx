@@ -10,7 +10,7 @@ export default function Home() {
       <div className="flex flex-col-reverse lg:flex-row min-h-screen">
         <Sidebar />
         <div className="flex-1 w-full p-8">
-          <VideoPlayer />
+          <VideoPlayer videoId="" />
           <VideoControls />
         </div>
       </div>

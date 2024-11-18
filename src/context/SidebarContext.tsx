@@ -29,6 +29,8 @@ type SidebarContextType = {
   pageSize: number
   totalPages: number
   currentVideos: VideoItem[]
+  selectedVideo: string | null
+  setSelectedVideo: (id: string) => void
   goToNextPage: () => void
   goToPreviousPage: () => void
 }
@@ -40,6 +42,7 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
   const pageSize = 10
 
   useEffect(() => {
@@ -83,6 +86,8 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
         pageSize,
         totalPages,
         currentVideos,
+        selectedVideo,
+        setSelectedVideo,
         goToNextPage,
         goToPreviousPage,
       }}
