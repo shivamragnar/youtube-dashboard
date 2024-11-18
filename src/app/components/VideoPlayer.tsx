@@ -14,12 +14,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPlayerReady, setIsPlayerReady] = useState(false)
 
-  const onPlayerReady = (event: YT.PlayerEvent) => {
+  const onPlayerReady = () => {
     setIsPlayerReady(true)
-    // const duration = event.target.getDuration();
-    // setDuration(duration);
-    // setTrimRange([0, Math.min(duration, 10)]);
-    // playerRef.current?.seekTo(trimRange[0]);
   }
 
   const initializePlayer = useCallback(() => {

@@ -3,15 +3,15 @@ import React, { useCallback, useState } from 'react'
 import Image from 'next/image';
 import { useSidebar } from '@/context/SidebarContext'
 
-const debounce = (func: (...args: any[]) => void, delay: number) => {
+const debounce = <T extends (...args: Parameters<T>) => void>(func: T, delay: number) => {
     let timer: NodeJS.Timeout;
-    return (...args: any[]) => {
+    return (...args: Parameters<T>) => {
       clearTimeout(timer);
       timer = setTimeout(() => {
         func(...args);
       }, delay);
     };
-  };
+};
 
 const Sidebar = () => {
     const [searchQuery, setSearchQuery] = useState<string>("")
