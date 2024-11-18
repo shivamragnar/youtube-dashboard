@@ -33,6 +33,7 @@ type SidebarContextType = {
   setSelectedVideo: (id: string) => void
   goToNextPage: () => void
   goToPreviousPage: () => void
+  setSearchQuery: (query: string) => void
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
@@ -43,6 +44,7 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState<string>("")
   const pageSize = 10
 
   useEffect(() => {
@@ -59,13 +61,23 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchVideos()
   }, [])
 
-  const totalPages = Math.ceil(videos.length / pageSize)
+  const filteredVideos = useMemo(() => {
+    return videos.filter(
+      (video) =>
+        video.snippet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.snippet.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+    )
+  }, [videos, searchQuery])
+
+  const totalPages = Math.ceil(filteredVideos.length / pageSize)
 
   const currentVideos = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     const endIndex = startIndex + pageSize
-    return videos.slice(startIndex, endIndex)
-  }, [currentPage, videos])
+    return filteredVideos.slice(startIndex, endIndex)
+  }, [currentPage, filteredVideos])
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -90,6 +102,7 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedVideo,
         goToNextPage,
         goToPreviousPage,
+        setSearchQuery,
       }}
     >
       {children}

@@ -1,23 +1,48 @@
 "use client";
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import Image from 'next/image';
 import { useSidebar } from '@/context/SidebarContext'
 
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
 
 const Sidebar = () => {
-    const { currentVideos, currentPage, totalPages, selectedVideo, setSelectedVideo, goToNextPage, goToPreviousPage } = useSidebar()
+    const [searchQuery, setSearchQuery] = useState<string>("")
+    const { currentVideos, currentPage, totalPages, selectedVideo, setSelectedVideo, goToNextPage, goToPreviousPage, setSearchQuery: updateSearchQuery } = useSidebar()
+
+    const debouncedSearch = useCallback(debounce((value: string) => updateSearchQuery(value), 300), []);
 
     const handleSelectVideo = (id: string) => {
         console.log('click')
         setSelectedVideo(id)
     }
 
-    console.log('Testing current videos', selectedVideo)
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    debouncedSearch(value);
+  }
+
     return (
         <div className='w-full lg:w-1/4 xl:w-[492px] p-4 border-b lg:border-b-0 lg:border-r border-gray-300'>
-            <div className=''>Search</div>
+            <div className=''>
+            <input
+                type='text'
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder='Search by title or description...'
+                className='w-full p-2 mb-4 border rounded'
+            />
+            </div>
             {currentVideos.map((video) => (
-                <div key={video.id.videoId} className={`flex ${selectedVideo === video.id.videoId ? 'border-gray-300' : ''}`} onClick={() => handleSelectVideo(video.id.videoId)}>
+                <div key={video.id.videoId} className={`flex cursor-pointer ${selectedVideo === video.id.videoId ? 'border-gray-300' : ''}`} onClick={() => handleSelectVideo(video.id.videoId)}>
                     <div className="relative w-40 h-24 flex-shrink-0">
                         <Image
                             src={video.snippet.thumbnails.high.url}
