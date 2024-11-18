@@ -1,7 +1,6 @@
 
 import Sidebar from "@/components/Sidebar";
 import VideoPlayer from "@/components/VideoPlayer";
-import VideoControls from "@/components/VideoControls";
 import { SidebarProvider } from "@/context/SidebarContext";
 
 export default function Home() {
@@ -11,7 +10,6 @@ export default function Home() {
         <Sidebar />
         <div className="flex-1 w-full p-8">
           <VideoPlayer videoId="" />
-          <VideoControls />
         </div>
       </div>
     </SidebarProvider>
