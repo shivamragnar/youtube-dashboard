@@ -4,11 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.ytimg.com",
+        hostname: "i.ytimg.com",
       },
       {
         protocol: "https",
-        hostname: "**.yt3.ggpht.com",
+        hostname: "yt3.ggpht.com",
       },
     ],
   },
