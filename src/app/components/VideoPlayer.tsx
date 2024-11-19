@@ -1,6 +1,7 @@
 "use client"
 import { useSidebar } from "@/context/SidebarContext"
 import { useCallback, useEffect, useRef, useState } from "react"
+import Slider from "@/components/Slider"
 
 type VideoPlayerProps = {
   videoId?: string
@@ -71,13 +72,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   return (
     <div className="video-player relative">
       <div ref={iframeRef} className="w-full h-[315px] lg:h-[450px]">{!selectedVideo && "Please select a video!"}</div>
-      <div className="video-controls mt-4 flex space-x-4">
+      <div className="video-controls mt-4 flex items-center gap-2 space-x-4">
         <button
           onClick={handlePlayPause}
           className="px-4 py-2 bg-blue-500 text-white rounded-md"
         >
           {isPlaying ? "Pause" : "Play"}
         </button>
+        <Slider min={0} max={100} onChange={(start, end) => console.log('testing onchange', start, end)} thumbs={2} />
       </div>
     </div>
   )
