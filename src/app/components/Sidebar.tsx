@@ -46,45 +46,47 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="w-full lg:w-1/4 xl:w-[492px] p-4 border-b lg:border-b-0 lg:border-r border-gray-300">
+    <div className="w-full lg:w-[350px] xl:w-[492px] p-4 border-b lg:max-h-screen lg:border-b-0 lg:border-r border-gray-300 relative">
       <div className="">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder="Search by title or description..."
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-2 mb-4 border rounded dark:bg-gray-800"
         />
       </div>
-      <div className="flex-1 overflow-y-auto h-2/4">
-        {currentVideos.map((video) => (
-          <div
-            key={video.id.videoId}
-            className={`flex cursor-pointer ${
-              selectedVideo === video.id.videoId ? "border-gray-300" : ""
-            }`}
-            onClick={() => handleSelectVideo(video.id.videoId)}
-          >
-            <div className="relative w-40 h-24 flex-shrink-0">
-              <Image
-                src={video.snippet.thumbnails.high.url}
-                alt={video.snippet.title}
-                fill
-                className="w-full h-full object-cover rounded-md"
-              />
-            </div>
-            <div className="ml-3 flex flex-col justify-between">
-              <h3 className="text-sm font-semibold text-white mb-1 leading-tight">
-                {video.snippet.title}
-              </h3>
-              <div className="text-xs text-gray-400">
-                <p>{video.snippet.channelTitle}</p>
+      <div className="flex-1 overflow-y-auto h-4/5 py-4">
+        <div className="flex flex-col gap-2">
+          {currentVideos.map((video) => (
+            <div
+              key={video.id.videoId}
+              className={`flex cursor-pointer p-1 ${
+                selectedVideo === video.id.videoId ? "border-2 border-blue-500 shadow-lg bg-rose-100 dark:bg-gray-600" : ""
+              }`}
+              onClick={() => handleSelectVideo(video.id.videoId)}
+            >
+              <div className="relative w-40 h-24 flex-shrink-0">
+                <Image
+                  src={video.snippet.thumbnails.high.url}
+                  alt={video.snippet.title}
+                  fill
+                  className="w-full h-full object-cover rounded-md"
+                />
+              </div>
+              <div className="ml-3 flex flex-col gap-0.5">
+                <h3 className="text-sm font-semibold mb-1 leading-tight">
+                  {video.snippet.title}
+                </h3>
+                <div className="text-xs text-gray-400">
+                  <p>{video.snippet.channelTitle}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-      <div className="flex mt-4 justify-center items-center fixed bottom-10 left-16">
+      <div className="flex mt-4 justify-center items-center absolute bottom-10 inset-x-1/4">
         <button
           onClick={goToPreviousPage}
           disabled={currentPage === 1}

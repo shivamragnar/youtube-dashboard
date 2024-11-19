@@ -70,7 +70,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
 
   return (
     <div className="video-player relative">
-      <div ref={iframeRef} className="w-full h-[315px] lg:h-[450px]"></div>
+      <div ref={iframeRef} className="w-full h-[315px] lg:h-[450px]">{!selectedVideo && "Please select a video!"}</div>
       <div className="video-controls mt-4 flex space-x-4">
         <button
           onClick={handlePlayPause}
