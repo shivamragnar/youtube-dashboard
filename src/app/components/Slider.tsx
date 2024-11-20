@@ -15,9 +15,9 @@ interface SliderProps {
   renderLabel: (time: number) => string
 }
 
-const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let timer: NodeJS.Timeout
-  return (...args: any[]) => {
+const debounce = <T extends unknown[]>(func: (...args: T) => void, delay: number) => {
+  let timer: ReturnType<typeof setTimeout>
+  return (...args: T) => {
     clearTimeout(timer)
     timer = setTimeout(() => {
       func(...args)
@@ -55,7 +55,7 @@ const Slider: React.FC<SliderProps> = React.memo(
     }, [minVal, maxVal, getPercent])
 
     const debouncedOnChange = useCallback(
-      debounce((newValues) => {
+      debounce((newValues: { min: number; max: number }) => {
         onChange(newValues)
       }, 300),
       [onChange]
@@ -106,4 +106,5 @@ const Slider: React.FC<SliderProps> = React.memo(
   }
 )
 
+Slider.displayName = 'Slider'
 export default Slider

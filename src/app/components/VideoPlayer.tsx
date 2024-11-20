@@ -51,7 +51,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
     }
   }, [selectedVideo])
 
-  const onPlayerReady = (event: any) => {
+  const onPlayerReady = (event: YT.PlayerEvent) => {
     setIsPlayerReady(true);
     event.target.pauseVideo()
     if (playerRef.current) {
@@ -80,7 +80,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
     }, 1000);
   }
 
-  const handlePlayerStateChange = (event: any) => {
+  const handlePlayerStateChange = (event: YT.OnStateChangeEvent) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
       setIsPlaying(true);
 
