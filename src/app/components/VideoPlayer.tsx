@@ -146,7 +146,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
 
   return (
     <div className="video-player relative">
-      <div ref={iframeRef} className="w-full h-[315px] lg:h-[450px]">
+      <div ref={iframeRef} className="w-full h-[315px] lg:h-[450px] flex items-center justify-center">
         {!selectedVideo && "Please select a video!"}
       </div>
       <div className="video-controls mt-4 flex items-center gap-2 space-x-4">

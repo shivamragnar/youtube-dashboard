@@ -56,12 +56,12 @@ const Sidebar = () => {
           className="w-full p-2 mb-4 border rounded dark:bg-gray-800"
         />
       </div>
-      <div className="flex-1 overflow-y-auto h-4/5 py-4">
-        <div className="flex flex-col gap-2">
+      <div className="flex-1 overflow-y-auto h-56 lg:h-4/5 py-4">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-col gap-2">
           {currentVideos.map((video) => (
             <div
               key={video.id.videoId}
-              className={`flex cursor-pointer p-1 ${
+              className={`flex cursor-pointer p-1 sm:flex-[1_1_49%] ${
                 selectedVideo === video.id.videoId ? "border-2 border-blue-500 shadow-lg bg-rose-100 dark:bg-gray-600" : ""
               }`}
               onClick={() => handleSelectVideo(video.id.videoId)}
@@ -75,7 +75,7 @@ const Sidebar = () => {
                 />
               </div>
               <div className="ml-3 flex flex-col gap-0.5">
-                <h3 className="text-sm font-semibold mb-1 leading-tight">
+                <h3 className="text-sm font-semibold mb-1 leading-tight line-clamp-3">
                   {video.snippet.title}
                 </h3>
                 <div className="text-xs text-gray-400">
@@ -86,7 +86,7 @@ const Sidebar = () => {
           ))}
         </div>
       </div>
-      <div className="flex mt-4 justify-center items-center absolute bottom-10 inset-x-1/4">
+      <div className="flex mt-4 justify-center items-center lg:absolute lg:bottom-10 lg:inset-x-1/4">
         <button
           onClick={goToPreviousPage}
           disabled={currentPage === 1}
