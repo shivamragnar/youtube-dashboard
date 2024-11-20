@@ -622,40 +622,6 @@
        },
        {
           "kind":"youtube#searchResult",
-          "etag":"JYDRvaipmZE1ejpGAYdkjfYFiTg",
-          "id":{
-             "kind":"youtube#video",
-             "videoId":"ZTt1anPAd2c"
-          },
-          "snippet":{
-             "publishedAt":"2023-09-29T20:24:51Z",
-             "channelId":"UCf5CA0OsvhhU-6AcSjT1oKQ",
-             "title":"GNARLIEST BACKWASH AND ZIPPER WAVES !!! Top 100!",
-             "description":"The gnarliest backwash and zipper waves captured over the years throughout Southern California! Oddly satisfying flares and ...",
-             "thumbnails":{
-                "default":{
-                   "url":"https://i.ytimg.com/vi/ZTt1anPAd2c/default.jpg",
-                   "width":120,
-                   "height":90
-                },
-                "medium":{
-                   "url":"https://i.ytimg.com/vi/ZTt1anPAd2c/mqdefault.jpg",
-                   "width":320,
-                   "height":180
-                },
-                "high":{
-                   "url":"https://i.ytimg.com/vi/ZTt1anPAd2c/hqdefault.jpg",
-                   "width":480,
-                   "height":360
-                }
-             },
-             "channelTitle":"BEEFS T.V.",
-             "liveBroadcastContent":"none",
-             "publishTime":"2023-09-29T20:24:51Z"
-          }
-       },
-       {
-          "kind":"youtube#searchResult",
           "etag":"iYt9sKjxm3HZBarsmNb107W8_Nc",
           "id":{
              "kind":"youtube#video",
