@@ -21,11 +21,35 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPlayerReady, setIsPlayerReady] = useState(false)
   const [duration, setDuration] = useState(0)
+  const [start, setStart] = useState(0)
+  const [end, setEnd] = useState(0)
 
   const startTimeRef = useRef<number>(0)
   const endTimeRef = useRef<number>(0)
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const saveStartAndEndTime = () => {
+    if (selectedVideo) {
+      localStorage.setItem(
+        `video_${selectedVideo}`,
+        JSON.stringify({ startTime: startTimeRef.current, endTime: endTimeRef.current })
+      )
+    }
+  }
+
+  const loadStartAndEndTime = useCallback(() => {
+    if (selectedVideo) {
+      const savedTimes = localStorage.getItem(`video_${selectedVideo}`)
+      if (savedTimes) {
+        const { startTime, endTime } = JSON.parse(savedTimes)
+        startTimeRef.current = startTime
+        endTimeRef.current = endTime
+        setStart(startTime)
+        setEnd(endTime)
+      }
+    }
+  }, [selectedVideo])
 
   const onPlayerReady = (event: any) => {
     setIsPlayerReady(true);
@@ -36,8 +60,24 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
         setDuration(videoDuration);
         startTimeRef.current = 0
         endTimeRef.current = videoDuration
+        setStart(0)
+        setEnd(videoDuration)
+        loadStartAndEndTime()
       }
     }
+  }
+
+  const createInterval = () => {
+    intervalRef.current = setInterval(() => {
+      const currentTime = playerRef.current.getCurrentTime();
+      if (currentTime >= endTimeRef.current) {
+        setIsPlaying(false);
+        playerRef.current.pauseVideo();
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      }
+    }, 1000);
   }
 
   const handlePlayerStateChange = (event: any) => {
@@ -49,16 +89,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
       }
 
       if (playerRef.current && playerRef.current.getCurrentTime) {
-        intervalRef.current = setInterval(() => {
-          const currentTime = playerRef.current.getCurrentTime();
-          if (currentTime >= endTimeRef.current) {
-            setIsPlaying(false);
-            playerRef.current.pauseVideo();
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-            }
-          }
-        }, 1000);
+        // intervalRef.current = setInterval(() => {
+        //   const currentTime = playerRef.current.getCurrentTime();
+        //   if (currentTime >= endTimeRef.current) {
+        //     setIsPlaying(false);
+        //     playerRef.current.pauseVideo();
+        //     if (intervalRef.current) {
+        //       clearInterval(intervalRef.current);
+        //     }
+        //   }
+        // }, 1000);
+        createInterval()
       }
     } else {
       if (intervalRef.current) {
@@ -97,7 +138,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   }, [selectedVideo])
 
   useEffect(() => {
-    console.log('useEffect 1')
     if (!window.YT) {
       const script = document.createElement("script")
       script.src = "https://www.youtube.com/iframe_api"
@@ -118,7 +158,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   }, [initializePlayer, selectedVideo])
 
   const handleRestartVideo = () => {
-    playerRef.current.seekTo(startTimeRef.current, true)
+    playerRef.current.seekTo(start, true)
     playerRef.current.playVideo()
   }
 
@@ -127,7 +167,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
     if (isPlaying) {
       playerRef.current.pauseVideo()
     } else {
-      playerRef.current.seekTo(startTimeRef.current, true)
+      playerRef.current.seekTo(start, true)
       playerRef.current.playVideo()
     }
     setIsPlaying(!isPlaying)
@@ -136,13 +176,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   const handleSliderChange = useCallback((values: { min: number; max?: number }) => {
     startTimeRef.current = values.min
     endTimeRef.current = values.max ?? duration
+    setStart(values.min)
+    setEnd(values.max ?? duration)
+    saveStartAndEndTime()
     if (playerRef.current) {
       if (isPlayerReady) { 
-        playerRef.current.seekTo(startTimeRef.current, true)
+        playerRef.current.seekTo(values.min, true)
       }
     }
   }, [selectedVideo, isPlayerReady])
-
 
   return (
     <div className="video-player relative">
@@ -159,7 +201,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
         <Slider
           min={0}
           max={duration}
-          value={{ min: startTimeRef.current, max: endTimeRef.current }}
+          value={{ min: start, max: end }}
           onChange={handleSliderChange}
           renderLabel={formatTime}
         />
