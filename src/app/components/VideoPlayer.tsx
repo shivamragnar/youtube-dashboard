@@ -13,63 +13,11 @@ const formatTime = (time: number) => {
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
 }
 
-const loadYouTubeAPI = (initializePlayer: () => void) => {
-  const script = document.createElement("script")
-  script.src = "https://www.youtube.com/iframe_api"
-  document.body.appendChild(script)
-  script.onload = () => {
-    window.onYouTubeIframeAPIReady = initializePlayer
-  }
-}
-
-const createPlayer = (
-  iframeRef: React.RefObject<HTMLDivElement>,
-  videoId: string,
-  onPlayerReady: (event: any) => void,
-  handlePlayerStateChange: (event: any) => void
-) => {
-  return new window.YT.Player(iframeRef.current, {
-    videoId,
-    playerVars: {
-      controls: 0,
-      modestbranding: 1,
-      rel: 0,
-      autoplay: 0,
-    },
-    events: {
-      onReady: onPlayerReady,
-      onStateChange: handlePlayerStateChange,
-    },
-  })
-}
-
-const setupIntervalToCheckEndTime = (
-  playerRef: React.RefObject<any>,
-  endTimeRef: React.RefObject<number>,
-  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>,
-  intervalRef: React.RefObject<NodeJS.Timeout | null>
-) => {
-  if (intervalRef.current) {
-    clearInterval(intervalRef.current)
-  }
-  if (playerRef.current && playerRef.current.getCurrentTime) {
-    intervalRef.current = setInterval(() => {
-      const currentTime = playerRef.current.getCurrentTime()
-      if (endTimeRef.current !== null && currentTime >= endTimeRef.current) {
-        // setIsPlaying(false);
-        playerRef.current.pauseVideo()
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current)
-        }
-      }
-    }, 1000)
-  }
-}
-
 const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
   const { selectedVideo } = useSidebar()
   const iframeRef = useRef<HTMLDivElement>(null)
-  const playerRef = useRef<YT.Player | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const playerRef = useRef<any>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPlayerReady, setIsPlayerReady] = useState(false)
   const [duration, setDuration] = useState(0)
@@ -79,44 +27,48 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const onPlayerReady = (event: YT.PlayerEvent) => {
-    setIsPlayerReady(true)
+  const onPlayerReady = (event: any) => {
+    setIsPlayerReady(true);
     event.target.pauseVideo()
     if (playerRef.current) {
-      const videoDuration = playerRef.current.getDuration()
+      const videoDuration = playerRef.current.getDuration();
       if (videoDuration) {
-        setDuration(videoDuration)
+        setDuration(videoDuration);
         startTimeRef.current = 0
         endTimeRef.current = videoDuration
       }
     }
   }
 
-  const handlePlayerStateChange = (event: YT.OnStateChangeEvent) => {
+  const handlePlayerStateChange = (event: any) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
-      setIsPlaying(true)
+      setIsPlaying(true);
+
       if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+        clearInterval(intervalRef.current);
       }
+
       if (playerRef.current && playerRef.current.getCurrentTime) {
         intervalRef.current = setInterval(() => {
-          const currentTime = playerRef.current?.getCurrentTime()
-          if (
-            endTimeRef.current !== null &&
-            currentTime >= endTimeRef.current
-          ) {
-            setIsPlaying(false)
-            playerRef.current?.pauseVideo()
+          const currentTime = playerRef.current.getCurrentTime();
+          if (currentTime >= endTimeRef.current) {
+            setIsPlaying(false);
+            playerRef.current.pauseVideo();
             if (intervalRef.current) {
-              clearInterval(intervalRef.current)
+              clearInterval(intervalRef.current);
             }
           }
-        }, 1000)
+        }, 1000);
       }
-      // setupIntervalToCheckEndTime(playerRef, endTimeRef, () => setIsPlaying(false), intervalRef);
     } else {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+        clearInterval(intervalRef.current);
+      }
+
+      if (event.data === window.YT.PlayerState.PAUSED) {
+        setIsPlaying(false);
+      } else if (event.data === window.YT.PlayerState.ENDED) {
+        handleRestartVideo();
       }
     }
   }
@@ -127,18 +79,33 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
         playerRef.current.destroy()
         setIsPlayerReady(false)
       }
-      playerRef.current = createPlayer(
-        iframeRef,
-        selectedVideo,
-        onPlayerReady,
-        handlePlayerStateChange
-      ) as unknown as typeof playerRef.current
+
+      playerRef.current = new window.YT.Player(iframeRef.current, {
+        videoId: selectedVideo,
+        playerVars: {
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          autoplay: 0,
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: handlePlayerStateChange,
+        },
+      })
     }
   }, [selectedVideo])
 
   useEffect(() => {
+    console.log('useEffect 1')
     if (!window.YT) {
-      loadYouTubeAPI(initializePlayer)
+      const script = document.createElement("script")
+      script.src = "https://www.youtube.com/iframe_api"
+      document.body.appendChild(script)
+    
+      script.onload = () => {
+        window.onYouTubeIframeAPIReady = initializePlayer
+      }
     } else {
       initializePlayer()
     }
@@ -150,38 +117,32 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({}) => {
     }
   }, [initializePlayer, selectedVideo])
 
-  const handlePlayPause = useCallback(() => {
+  const handleRestartVideo = () => {
+    playerRef.current.seekTo(startTimeRef.current, true)
+    playerRef.current.playVideo()
+  }
+
+  const handlePlayPause = () => {
     if (!isPlayerReady || !playerRef.current) return
     if (isPlaying) {
       playerRef.current.pauseVideo()
     } else {
-      console.log("before playeing", startTimeRef.current)
       playerRef.current.seekTo(startTimeRef.current, true)
       playerRef.current.playVideo()
     }
     setIsPlaying(!isPlaying)
-  }, [isPlaying, isPlayerReady])
+  }
 
-  const handleSliderChange = useCallback(
-    (values: { min: number; max?: number }) => {
-      startTimeRef.current = values.min
-      endTimeRef.current = values.max ?? duration
-      console.log("testing sider", playerRef.current, isPlayerReady)
-      if (playerRef.current) {
-        if (isPlayerReady) {
-          console.log(
-            "sliderchange seek",
-            startTimeRef.current,
-            endTimeRef.current
-          )
-          playerRef.current.seekTo(startTimeRef.current, true)
-        }
+  const handleSliderChange = useCallback((values: { min: number; max?: number }) => {
+    startTimeRef.current = values.min
+    endTimeRef.current = values.max ?? duration
+    if (playerRef.current) {
+      if (isPlayerReady) { 
+        playerRef.current.seekTo(startTimeRef.current, true)
       }
-    },
-    [selectedVideo, isPlayerReady]
-  )
+    }
+  }, [selectedVideo, isPlayerReady])
 
-  console.log("testing video isplayig", isPlaying, playerRef.current)
 
   return (
     <div className="video-player relative">
