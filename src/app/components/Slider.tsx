@@ -1,95 +1,109 @@
-import { ChangeEvent, useCallback, useEffect, useState, useRef } from "react"
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+} from "react"
 import "@/styles/Slider.css"
 
 interface SliderProps {
   min: number
   max: number
-  onChange: Function
-  thumbs: number
+  value: { min: number; max: number }
+  onChange: (values: { min: number; max: number }) => void
+  renderLabel: (time: number) => string
 }
 
-const Slider: React.FC<SliderProps> = ({
-  min,
-  max,
-  onChange,
-  thumbs = 2,
-}) => {
-  const [minVal, setMinVal] = useState(min)
-  const [maxVal, setMaxVal] = useState(max)
-  const minValRef = useRef<HTMLInputElement>(null)
-  const maxValRef = useRef<HTMLInputElement>(null)
-  const range = useRef<HTMLDivElement>(null)
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let timer: NodeJS.Timeout
+  return (...args: any[]) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      func(...args)
+    }, delay)
+  }
+}
 
-  const getPercent = useCallback(
-    (value: number) => Math.round(((value - min) / (max - min)) * 100),
-    [min, max]
-  )
+const Slider: React.FC<SliderProps> = React.memo(
+  ({ min, max, value, onChange, renderLabel }) => {
+    const [minVal, setMinVal] = useState(min)
+    const [maxVal, setMaxVal] = useState(max)
+    const rangeRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (thumbs === 2 && maxValRef.current) {
-      const minPercent = getPercent(minVal)
-      const maxPercent = getPercent(+maxValRef.current.value)
+    const getPercent = useCallback(
+      (val: number) => ((val - min) / (max - min)) * 100,
+      [min, max]
+    )
 
-      if (range.current) {
-        range.current.style.left = `${minPercent}%`
-        range.current.style.width = `${maxPercent - minPercent}%`
+    useEffect(() => {
+      if (value.min !== minVal) {
+        setMinVal(value.min)
       }
+      if (value.max !== maxVal) {
+        setMaxVal(value.max)
+      }
+    }, [min, max])
+
+    useEffect(() => {
+      if (rangeRef.current) {
+        const minPercent = getPercent(minVal)
+        const maxPercent = getPercent(maxVal)
+        rangeRef.current.style.left = `${minPercent}%`
+        rangeRef.current.style.width = `${maxPercent - minPercent}%`
+      }
+    }, [minVal, maxVal, getPercent])
+
+    const debouncedOnChange = useCallback(
+      debounce((newValues) => {
+        onChange(newValues)
+      }, 300),
+      [onChange]
+    )
+
+    const handleMinChange = (event: ChangeEvent<HTMLInputElement>) => {
+      const newValue = Math.min(+event.target.value, maxVal - 1)
+      setMinVal(newValue)
+      debouncedOnChange({ min: newValue, max: maxVal })
     }
-  }, [minVal, maxVal, thumbs, getPercent])
 
-  useEffect(() => {
-    if (thumbs === 2) {
-      onChange({ min: minVal, max: maxVal })
-    } else {
-      onChange({ value: minVal })
+    const handleMaxChange = (event: ChangeEvent<HTMLInputElement>) => {
+      const newValue = Math.max(+event.target.value, minVal + 1)
+      setMaxVal(newValue)
+      debouncedOnChange({ min: minVal, max: newValue })
     }
-  }, [minVal, maxVal, thumbs, onChange])
 
-  return (
-    <div className="flex-1 relative">
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={minVal}
-        ref={minValRef}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          const value =
-            thumbs === 2
-              ? Math.min(+event.target.value, maxVal - 1)
-              : +event.target.value
-          setMinVal(value)
-          event.target.value = value.toString()
-        }}
-        className={`w-full thumb thumb--zindex-3 ${
-          thumbs === 2 && minVal > max - 100 ? "thumb--zindex-5" : ""
-        }`}
-      />
+    return (
+      <div className="flex-1 relative">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={minVal}
+          onChange={handleMinChange}
+          className={`w-full thumb thumb--zindex-3 ${
+            minVal > max - 100 ? "thumb--zindex-5" : ""
+          }`}
+        />
 
-      {thumbs === 2 && (
         <input
           type="range"
           min={min}
           max={max}
           value={maxVal}
-          ref={maxValRef}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            const value = Math.max(+event.target.value, minVal + 1)
-            setMaxVal(value)
-            event.target.value = value.toString()
-          }}
+          onChange={handleMaxChange}
           className="w-full thumb thumb--zindex-4"
         />
-      )}
 
-      <div className="flex-1">
-        <div className="slider-track"></div>
-        {thumbs === 2 && <div ref={range} className="slider-range"></div>}
-        <div className="slider-left-value">Start: {minVal}</div>
-        {thumbs === 2 && <div className="slider-right-value">End: {maxVal}</div>}
+        <div className="flex-1">
+          <div className="slider-track"></div>
+          <div ref={rangeRef} className="slider-range"></div>
+          <div className="slider-left-value">Start: {renderLabel(minVal)}</div>
+          <div className="slider-right-value">End: {renderLabel(maxVal)}</div>
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
+)
 
 export default Slider
